@@ -1,1115 +1,796 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NOUR MOHAMED — Director's Workspace</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap" rel="stylesheet">
-<style>
-/* ════════════════════════════════════════════════
-   TOKENS
-════════════════════════════════════════════════ */
-:root {
-  --bg0:  #050505;
-  --bg1:  #0A0A0A;
-  --bg2:  #111111;
-  --bg3:  #1A1A1A;
-  --bg4:  #242424;
-  --b1:   #222222;
-  --b2:   #2E2E2E;
-  --b3:   #3A3A3A;
-  --smoke:#5A5A5A;
-  --ash:  #888888;
-  --mist: #AAAAAA;
-  --white:#EBEBEB;
-  --fire: #E8825A;
-  --fdim: rgba(232,130,90,.12);
-  --fd:   'Syne', sans-serif;
-  --fu:   'DM Sans', sans-serif;
-  --r:    3px;
-}
-
-/* ════════════════════════════════════════════════
-   RESET
-════════════════════════════════════════════════ */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100vw;height:100vh;overflow:hidden}
-body{background:var(--bg0);color:var(--white);font-family:var(--fu);font-size:12px;-webkit-font-smoothing:antialiased}
-a{color:inherit;text-decoration:none}
-button{background:none;border:none;cursor:pointer;color:inherit;font:inherit;padding:0}
-svg{display:block}
-
-/* ════════════════════════════════════════════════
-   SCROLLBAR
-════════════════════════════════════════════════ */
-::-webkit-scrollbar{width:2px;height:2px}
-::-webkit-scrollbar-track{background:var(--bg1)}
-::-webkit-scrollbar-thumb{background:var(--fire);border-radius:1px}
-
-/* ════════════════════════════════════════════════
-   NOISE GRAIN
-════════════════════════════════════════════════ */
-#noise{
-  position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:.032;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size:128px 128px;mix-blend-mode:overlay
-}
-
-/* ════════════════════════════════════════════════
-   INTRO SCREEN
-════════════════════════════════════════════════ */
-#intro{
-  position:fixed;inset:0;z-index:9999;
-  background:#000;
-  display:flex;align-items:center;justify-content:center;
-  flex-direction:column;gap:16px;
-  transition:opacity .4s ease;
-}
-#intro.out{opacity:0;pointer-events:none}
-.i-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:1}
-.i-svg{width:min(76vw,680px);overflow:visible;position:relative;z-index:2}
-#iText{
-  font-family:'Syne',sans-serif;font-weight:800;font-size:76px;
-  fill:none;stroke:var(--white);stroke-width:1.5;
-  stroke-linecap:round;stroke-linejoin:round;
-  stroke-dasharray:2400;stroke-dashoffset:2400;
-  animation:draw 1.9s cubic-bezier(.4,0,.2,1) .25s forwards;
-}
-@keyframes draw{to{stroke-dashoffset:0}}
-.i-tagline{
-  font-family:var(--fu);font-size:11px;letter-spacing:.22em;
-  text-transform:uppercase;color:var(--smoke);
-  opacity:0;animation:fadeIn .6s ease 2.1s forwards;
-}
-@keyframes fadeIn{to{opacity:1}}
-
-/* ════════════════════════════════════════════════
-   APP GRID
-════════════════════════════════════════════════ */
-#app{
-  width:100vw;height:100vh;
-  display:grid;
-  grid-template-columns:48px 1fr 268px;
-  grid-template-rows:36px 1fr;
-  grid-template-areas:"bar bar bar""tb cv ip";
-  opacity:0;transition:opacity .5s ease;
-}
-#app.on{opacity:1}
-
-/* ════════════════════════════════════════════════
-   TOP MENU BAR
-════════════════════════════════════════════════ */
-#bar{
-  grid-area:bar;
-  background:var(--bg2);
-  border-bottom:1px solid var(--b1);
-  display:flex;align-items:center;
-  padding:0 10px;gap:0;
-  position:relative;z-index:200;
-  user-select:none;
-}
-.b-logo{
-  font-family:var(--fd);font-weight:800;font-size:13px;
-  color:var(--fire);letter-spacing:.06em;
-  margin-right:14px;flex-shrink:0;
-}
-.b-sep{width:1px;height:16px;background:var(--b1);margin:0 6px;flex-shrink:0}
-.b-menu{display:flex;align-items:center;flex:1;gap:0}
-.b-item{
-  position:relative;
-  padding:0 9px;height:36px;
-  display:flex;align-items:center;
-  font-size:11px;color:var(--smoke);
-  cursor:pointer;transition:color .15s,background .15s;
-  white-space:nowrap;
-}
-.b-item:hover,.b-item.open{color:var(--white);background:var(--bg3)}
-.dd{
-  position:absolute;top:100%;left:0;
-  background:var(--bg3);border:1px solid var(--b2);
-  min-width:186px;z-index:300;
-  box-shadow:0 12px 32px rgba(0,0,0,.6);
-  display:none;
-}
-.dd.open{display:block}
-.dd-row{
-  padding:6px 12px;font-size:11px;color:var(--smoke);
-  cursor:pointer;display:flex;align-items:center;
-  justify-content:space-between;gap:16px;
-  transition:background .1s,color .1s;
-}
-.dd-row:hover:not(.off){background:var(--bg4);color:var(--white)}
-.dd-row.off{opacity:.3;cursor:default}
-.dd-row .sc{color:var(--b3);font-size:9px;letter-spacing:.04em}
-.dd-sep{height:1px;background:var(--b1);margin:3px 0}
-.b-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-.b-label{font-size:9px;color:var(--b3);letter-spacing:.1em;text-transform:uppercase}
-#bTool{font-size:10px;color:var(--smoke);letter-spacing:.05em}
-#bClock{
-  font-family:var(--fd);font-size:11px;font-weight:700;
-  color:var(--ash);letter-spacing:.1em;min-width:66px;text-align:right;
-}
-.batt{display:flex;align-items:center;gap:4px}
-.batt-icon{
-  width:22px;height:10px;border:1px solid var(--smoke);
-  border-radius:2px;position:relative;padding:1px;
-  display:flex;align-items:center;
-}
-.batt-icon::after{
-  content:'';position:absolute;right:-4px;top:50%;
-  transform:translateY(-50%);
-  width:3px;height:4px;background:var(--smoke);border-radius:0 1px 1px 0;
-}
-#battFill{height:100%;background:var(--fire);border-radius:1px;width:60%;transition:width .5s}
-#battPct{font-size:9px;color:var(--smoke)}
-
-/* ════════════════════════════════════════════════
-   LEFT TOOLBAR
-════════════════════════════════════════════════ */
-#tb{
-  grid-area:tb;
-  background:var(--bg2);border-right:1px solid var(--b1);
-  display:flex;flex-direction:column;align-items:center;
-  padding:8px 0;gap:2px;
-}
-.t{
-  width:36px;height:36px;border-radius:var(--r);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;position:relative;
-  transition:background .15s;color:var(--smoke);
-}
-.t svg{width:15px;height:15px;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;transition:stroke .15s}
-.t:hover{background:var(--bg3);color:var(--ash)}
-.t.on{background:var(--fdim);color:var(--fire)}
-.t .hk{
-  position:absolute;bottom:3px;right:3px;
-  font-size:7px;color:var(--smoke);line-height:1;opacity:.65;
-}
-.t.on .hk{color:var(--fire);opacity:.8}
-/* Tooltip */
-.t[data-tip]::before{
-  content:attr(data-tip);
-  position:absolute;left:calc(100% + 10px);top:50%;
-  transform:translateY(-50%);
-  background:var(--bg3);border:1px solid var(--b2);
-  color:var(--white);font-size:10px;font-family:var(--fu);
-  white-space:nowrap;padding:4px 8px;border-radius:2px;
-  pointer-events:none;opacity:0;transition:opacity .15s;z-index:400;
-}
-.t[data-tip]:hover::before{opacity:1}
-.tb-sep{width:22px;height:1px;background:var(--b1);margin:4px 0}
-
-/* ════════════════════════════════════════════════
-   CENTER CANVAS
-════════════════════════════════════════════════ */
-#cv{
-  grid-area:cv;
-  background:var(--bg1);
-  background-image:radial-gradient(circle,rgba(255,255,255,.055) 1px,transparent 1px);
-  background-size:20px 20px;
-  display:flex;flex-direction:column;overflow:hidden;
-  position:relative;
-}
-.cv-top{
-  height:26px;background:var(--bg2);border-bottom:1px solid var(--b1);
-  display:flex;align-items:center;padding:0 10px;gap:8px;flex-shrink:0;
-}
-.cv-crumb{font-size:10px;color:var(--smoke);display:flex;align-items:center;gap:5px}
-.cv-crumb b{color:var(--ash)}
-.cv-body{flex:1;overflow-y:auto;overflow-x:hidden;position:relative}
-.cv-bot{
-  height:20px;background:var(--bg2);border-top:1px solid var(--b1);
-  display:flex;align-items:center;padding:0 10px;gap:14px;flex-shrink:0;
-}
-.sb{font-size:9px;color:var(--smoke);display:flex;align-items:center;gap:3px}
-.sb span{color:var(--ash)}
-.sb-r{margin-left:auto}
-
-/* Views */
-.view{display:none;padding:28px;min-height:100%;animation:vIn .2s ease}
-.view.on{display:block}
-@keyframes vIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-
-/* ════════════════════════════════════════════════
-   RIGHT INSPECTOR
-════════════════════════════════════════════════ */
-#ip{
-  grid-area:ip;
-  background:var(--bg2);border-left:1px solid var(--b1);
-  display:flex;flex-direction:column;overflow:hidden;
-}
-.ip-top{
-  height:26px;border-bottom:1px solid var(--b1);
-  display:flex;align-items:center;padding:0 10px;
-  flex-shrink:0;gap:6px;
-}
-.ip-title{font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke);flex:1}
-.ip-body{flex:1;overflow-y:auto;padding:0}
-.is{border-bottom:1px solid var(--b1);padding:9px 10px}
-.is-t{font-size:8px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--b3);margin-bottom:7px}
-.ir{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;gap:6px}
-.il{font-size:9px;color:var(--smoke);flex-shrink:0}
-.iv{font-size:9px;color:var(--ash);text-align:right;line-height:1.4}
-.iv.hi{color:var(--fire);font-weight:500}
-.i-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}
-.i-tag{font-size:8px;border:1px solid var(--b2);color:var(--smoke);padding:2px 5px;border-radius:1px;text-transform:uppercase;letter-spacing:.04em}
-.i-tag.fi{border-color:var(--fire);color:var(--fire)}
-.i-big{font-family:var(--fd);font-size:20px;font-weight:800;color:var(--white);letter-spacing:-.02em;line-height:1;margin-bottom:2px}
-.i-sub{font-size:8px;color:var(--smoke);letter-spacing:.1em;text-transform:uppercase}
-.i-desc{font-size:9px;color:var(--smoke);line-height:1.65;font-style:italic;margin-top:3px}
-.i-back{font-size:9px;color:var(--smoke);cursor:pointer;letter-spacing:.08em;text-transform:uppercase;transition:color .15s}
-.i-back:hover{color:var(--fire)}
-
-/* ════════════════════════════════════════════════
-   VIEW 0 — HERO
-════════════════════════════════════════════════ */
-.artboard{
-  position:relative;display:inline-block;
-  border:1px solid var(--b2);padding:36px 44px;
-  background:var(--bg0);margin-top:20px;
-}
-.ab-label{
-  position:absolute;top:-18px;left:0;
-  font-size:9px;color:var(--smoke);letter-spacing:.1em;text-transform:uppercase;
-}
-/* Corner handles */
-.ch{position:absolute;width:7px;height:7px;border-color:var(--b3);border-style:solid}
-.ch-tl{top:-1px;left:-1px;border-width:1px 0 0 1px}
-.ch-tr{top:-1px;right:-1px;border-width:1px 1px 0 0}
-.ch-bl{bottom:-1px;left:-1px;border-width:0 0 1px 1px}
-.ch-br{bottom:-1px;right:-1px;border-width:0 1px 1px 0}
-.h-name{
-  font-family:var(--fd);
-  font-size:clamp(44px,8vw,96px);
-  font-weight:800;line-height:.88;
-  color:var(--white);letter-spacing:-.025em;
-  text-transform:uppercase;margin-bottom:18px;
-}
-.h-role-row{display:flex;align-items:center;gap:8px;margin-bottom:20px}
-.h-dot{width:5px;height:5px;border-radius:50%;background:var(--fire);flex-shrink:0}
-.h-role{font-size:13px;font-weight:300;color:var(--ash);letter-spacing:.04em;transition:opacity .25s ease}
-.h-role.fade{opacity:0}
-.h-meta{display:flex;gap:22px;padding-top:18px;border-top:1px solid var(--b1)}
-.hm{display:flex;flex-direction:column;gap:3px}
-.hm-k{font-size:8px;color:var(--smoke);letter-spacing:.14em;text-transform:uppercase}
-.hm-v{font-size:10px;color:var(--ash)}
-
-/* ════════════════════════════════════════════════
-   VIEW 1 — MANIFESTO
-════════════════════════════════════════════════ */
-.m-wrap{max-width:640px}
-.eyebrow{font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:var(--smoke);margin-bottom:14px}
-.m-q{
-  font-family:var(--fd);font-size:clamp(20px,3vw,36px);font-weight:700;
-  color:var(--white);line-height:1.15;
-  border-left:2px solid var(--fire);padding-left:18px;
-  margin-bottom:24px;letter-spacing:-.01em;
-}
-.m-usp{font-size:12px;font-weight:300;color:var(--ash);line-height:1.75;margin-bottom:32px;max-width:500px}
-.p-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b1)}
-.pc{
-  background:var(--bg0);padding:14px 16px;
-  border-top:1px solid transparent;
-  transition:background .2s,border-color .2s;
-}
-.pc:hover{background:var(--bg3);border-top-color:var(--fire)}
-.pc-n{font-size:8px;color:var(--fire);letter-spacing:.14em;margin-bottom:5px}
-.pc-t{font-family:var(--fd);font-size:12px;font-weight:700;color:var(--white);margin-bottom:5px;letter-spacing:.03em}
-.pc-b{font-size:9px;color:var(--smoke);line-height:1.6}
-
-/* ════════════════════════════════════════════════
-   VIEW 2 — WORK CANVAS
-════════════════════════════════════════════════ */
-#wk-canvas{position:relative;width:100%;min-height:560px}
-.pw{
-  position:absolute;
-  background:var(--bg3);border:1px solid var(--b2);
-  min-width:230px;max-width:280px;
-  cursor:default;user-select:none;
-  transition:box-shadow .2s,border-color .2s;
-}
-.pw:hover{box-shadow:0 8px 28px rgba(0,0,0,.5)}
-.pw.sel{border-color:var(--fire);box-shadow:0 0 0 1px var(--fire),0 8px 28px rgba(232,130,90,.14)}
-.pw-bar{
-  height:26px;background:var(--bg4);border-bottom:1px solid var(--b1);
-  display:flex;align-items:center;padding:0 8px;gap:5px;
-  cursor:grab;
-}
-.pw-bar:active{cursor:grabbing}
-.pw-d{width:7px;height:7px;border-radius:50%;background:var(--b2);flex-shrink:0}
-.pw-d.f{background:var(--fire)}
-.pw-n{font-size:9px;font-weight:500;color:var(--smoke);letter-spacing:.05em;margin-left:3px;flex:1}
-.pw-x{
-  width:13px;height:13px;border-radius:50%;background:var(--b2);
-  display:flex;align-items:center;justify-content:center;
-  font-size:9px;color:transparent;cursor:pointer;
-  transition:background .15s,color .15s;flex-shrink:0;
-}
-.pw-x:hover{background:#5a1515;color:#ff9999}
-.pw-body{padding:10px}
-.pw-cat{font-size:8px;color:var(--smoke);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
-.pw-ttl{font-family:var(--fd);font-size:15px;font-weight:800;color:var(--white);letter-spacing:-.01em;margin-bottom:9px}
-.pw-mets{display:flex;flex-direction:column;gap:3px;padding:7px 0;border-top:1px solid var(--b1);border-bottom:1px solid var(--b1);margin-bottom:7px}
-.pw-met{font-size:9px;color:var(--ash)}
-.pw-met strong{color:var(--white);font-weight:500}
-.pw-tags{display:flex;flex-wrap:wrap;gap:3px}
-.pw-tag{font-size:7px;border:1px solid var(--b1);color:var(--smoke);padding:2px 5px;text-transform:uppercase;letter-spacing:.04em}
-
-/* ════════════════════════════════════════════════
-   VIEW 3 — ARSENAL
-════════════════════════════════════════════════ */
-.sk-wrap{max-width:620px}
-.sk-row{margin-bottom:18px}
-.sk-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
-.sk-name{font-family:var(--fd);font-size:12px;font-weight:700;color:var(--white);letter-spacing:.03em}
-.sk-pct{font-size:9px;color:var(--smoke)}
-.sk-bg{height:1px;background:var(--b2);position:relative;overflow:hidden}
-.sk-fill{
-  position:absolute;left:0;top:0;height:100%;
-  background:linear-gradient(90deg,var(--fire),#F0A070);
-  width:0;transition:width 1.3s cubic-bezier(.16,1,.3,1);
-}
-.sk-fill.go{width:var(--w)}
-.sk-chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
-.sk-chip{font-size:8px;border:1px solid var(--b1);color:var(--smoke);padding:2px 6px;text-transform:uppercase;letter-spacing:.04em}
-
-/* ════════════════════════════════════════════════
-   VIEW 4 — METRICS
-════════════════════════════════════════════════ */
-.mt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b1);max-width:720px}
-.mt-blk{
-  background:var(--bg0);padding:22px 18px;position:relative;
-  overflow:hidden;transition:background .2s;
-}
-.mt-blk::after{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:transparent;transition:background .3s;
-}
-.mt-blk:hover{background:var(--bg3)}
-.mt-blk:hover::after{background:var(--fire)}
-.mt-pre{font-family:var(--fd);font-size:22px;font-weight:800;color:var(--fire);line-height:1;display:inline}
-.mt-num{font-family:var(--fd);font-size:38px;font-weight:800;color:var(--white);line-height:1;letter-spacing:-.03em;display:inline}
-.mt-unit{font-family:var(--fd);font-size:22px;font-weight:800;color:var(--fire);line-height:1;display:inline}
-.mt-lbl{font-size:9px;color:var(--smoke);letter-spacing:.1em;text-transform:uppercase;margin-top:5px;line-height:1.4}
-.mt-src{font-size:8px;color:var(--b3);margin-top:2px}
-
-/* ════════════════════════════════════════════════
-   VIEW 5 — CONTACT
-════════════════════════════════════════════════ */
-.ct-wrap{max-width:580px}
-.ct-cta{
-  font-family:var(--fd);font-size:clamp(28px,5vw,58px);
-  font-weight:800;color:var(--white);line-height:.95;
-  letter-spacing:-.02em;margin-bottom:32px;
-}
-.ct-cta em{color:var(--fire);font-style:normal}
-.ct-link{
-  display:flex;align-items:baseline;gap:10px;
-  padding:9px 0;border-bottom:1px solid var(--b1);
-  transition:border-color .2s;
-}
-.ct-link:hover{border-color:var(--fire)}
-.ct-link:hover .ct-v{color:var(--fire)}
-.ct-lbl{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--smoke);width:38px;flex-shrink:0}
-.ct-v{font-family:var(--fd);font-size:clamp(12px,1.8vw,17px);font-weight:700;color:var(--white);transition:color .2s}
-.soc-row{display:flex;gap:8px;margin-top:22px}
-.soc{
-  width:34px;height:34px;border:1px solid var(--b2);
-  border-radius:50%;display:flex;align-items:center;justify-content:center;
-  color:var(--smoke);transition:border-color .2s,color .2s;
-}
-.soc:hover{border-color:var(--fire);color:var(--fire)}
-.soc svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-
-/* ════════════════════════════════════════════════
-   MOBILE
-════════════════════════════════════════════════ */
-@media(max-width:767px){
-  #app{
-    grid-template-columns:1fr;
-    grid-template-rows:36px 1fr 50px;
-    grid-template-areas:"bar""cv""tb";
-  }
-  #ip{display:none}
-  #tb{
-    flex-direction:row;border-right:none;border-top:1px solid var(--b1);
-    padding:0 6px;justify-content:space-around;
-  }
-  .tb-sep{display:none}
-  .t{width:42px;height:42px}
-  .t[data-tip]::before{display:none}
-  .p-grid{grid-template-columns:1fr}
-  .mt-grid{grid-template-columns:repeat(2,1fr)}
-  #bClock{display:none}
-  .batt{display:none}
-  /* Bottom sheet */
-  #bsheet{
-    position:fixed;bottom:50px;left:0;right:0;
-    background:var(--bg2);border-top:1px solid var(--b2);
-    z-index:500;max-height:58vh;overflow-y:auto;
-    transform:translateY(100%);transition:transform .35s cubic-bezier(.16,1,.3,1);
-  }
-  #bsheet.on{transform:translateY(0)}
-  .bs-handle{width:30px;height:3px;border-radius:2px;background:var(--b2);margin:10px auto 4px}
-  .bs-x{position:absolute;top:8px;right:12px;font-size:18px;color:var(--smoke);cursor:pointer;line-height:1}
-}
-@media(min-width:768px){#bsheet{display:none}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOUR MOHAMED — Nour OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<div id="noise"></div>
+<!-- ═══════════════════════════════════════════════
+     NOISE GRAIN OVERLAY
+═══════════════════════════════════════════════ -->
+<div id="noise" aria-hidden="true"></div>
 
-<!-- ══════════════════════════ INTRO ══════════════════════════ -->
-<div id="intro">
-  <div class="i-flash" id="iFlash"></div>
-  <svg class="i-svg" viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg">
-    <text id="iText" x="350" y="86" text-anchor="middle">NOUR MOHAMED</text>
+<!-- ═══════════════════════════════════════════════
+     BOOT INTRO
+═══════════════════════════════════════════════ -->
+<div id="intro" role="presentation">
+  <div id="iFlash" aria-hidden="true"></div>
+  <svg class="i-svg" viewBox="0 0 800 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <text id="iText" x="400" y="96" text-anchor="middle">NOUR MOHAMED</text>
   </svg>
-  <span class="i-tagline">AI Director · Creative Director · World Builder</span>
+  <span class="i-tagline" aria-hidden="true">AI Director · Creative Director · World Builder</span>
 </div>
 
-<!-- ══════════════════════════ APP ══════════════════════════ -->
+<!-- ═══════════════════════════════════════════════
+     APP OS — CSS GRID ROOT
+═══════════════════════════════════════════════ -->
 <div id="app">
 
-  <!-- TOP BAR -->
+  <!-- ───────────────────────────────────────────
+       TOP MENU BAR
+  ─────────────────────────────────────────────── -->
   <header id="bar">
-    <span class="b-logo">NM</span>
-    <div class="b-sep"></div>
-    <nav class="b-menu">
 
-      <div class="b-item" id="miFile" onclick="toggleDD('ddFile',this)">File
-        <div class="dd" id="ddFile">
-          <div class="dd-row off">New Project <span class="sc">⌘ N</span></div>
-          <div class="dd-sep"></div>
-          <div class="dd-row" onclick="dlCV()">Download CV <span class="sc">⌘ D</span></div>
-          <div class="dd-sep"></div>
-          <div class="dd-row off">Export Portfolio <span class="sc">⌘ E</span></div>
+    <span class="b-logo" aria-label="Nour Mohamed OS">NM OS</span>
+    <div class="b-sep" aria-hidden="true"></div>
+
+    <nav class="b-menu" aria-label="Application menu">
+
+      <!-- File -->
+      <div class="b-item" id="miFile" data-dd="ddFile" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false">
+        File
+        <div class="dd" id="ddFile" role="menu">
+          <div class="dd-row off" role="menuitem" aria-disabled="true">
+            New Project <span class="sc">⌘N</span>
+          </div>
+          <div class="dd-sep" role="separator"></div>
+          <div class="dd-row" id="ddDLResume" role="menuitem" tabindex="-1">
+            Download Resume <span class="sc">⌘R</span>
+          </div>
+          <div class="dd-sep" role="separator"></div>
+          <div class="dd-row off" role="menuitem" aria-disabled="true">
+            Export Portfolio <span class="sc">⌘E</span>
+          </div>
         </div>
       </div>
 
-      <div class="b-item" id="miView" onclick="toggleDD('ddView',this)">View
-        <div class="dd" id="ddView">
-          <div class="dd-row" onclick="go(0)">Hero <span class="sc">V</span></div>
-          <div class="dd-row" onclick="go(1)">Manifesto <span class="sc">P</span></div>
-          <div class="dd-row" onclick="go(2)">Work <span class="sc">F</span></div>
-          <div class="dd-row" onclick="go(3)">Arsenal <span class="sc">L</span></div>
-          <div class="dd-row" onclick="go(4)">Metrics <span class="sc">G</span></div>
-          <div class="dd-row" onclick="go(5)">Contact <span class="sc">E</span></div>
+      <!-- Edit -->
+      <div class="b-item" id="miEdit" data-dd="ddEdit" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false">
+        Edit
+        <div class="dd" id="ddEdit" role="menu">
+          <div class="dd-row off" role="menuitem" aria-disabled="true">Undo <span class="sc">⌘Z</span></div>
+          <div class="dd-row off" role="menuitem" aria-disabled="true">Redo <span class="sc">⌘⇧Z</span></div>
+          <div class="dd-sep" role="separator"></div>
+          <div class="dd-row off" role="menuitem" aria-disabled="true">Preferences <span class="sc">⌘,</span></div>
         </div>
       </div>
 
-      <div class="b-item" id="miWork" onclick="toggleDD('ddWork',this)">Work
-        <div class="dd" id="ddWork">
-          <div class="dd-row off">All Projects</div>
-          <div class="dd-sep"></div>
-          <div class="dd-row" onclick="go(2);closeAllDD()">Open Work Canvas <span class="sc">F</span></div>
+      <!-- View -->
+      <div class="b-item" id="miView" data-dd="ddView" role="button" tabindex="0" aria-haspopup="menu" aria-expanded="false">
+        View
+        <div class="dd" id="ddView" role="menu">
+          <div class="dd-row" data-goto="0" role="menuitem" tabindex="-1">Hero        <span class="sc">V</span></div>
+          <div class="dd-row" data-goto="1" role="menuitem" tabindex="-1">Manifesto   <span class="sc">P</span></div>
+          <div class="dd-row" data-goto="2" role="menuitem" tabindex="-1">Work        <span class="sc">F</span></div>
+          <div class="dd-row" data-goto="3" role="menuitem" tabindex="-1">Arsenal     <span class="sc">L</span></div>
+          <div class="dd-row" data-goto="4" role="menuitem" tabindex="-1">Metrics     <span class="sc">G</span></div>
+          <div class="dd-row" data-goto="5" role="menuitem" tabindex="-1">The Lab     <span class="sc">T</span></div>
+          <div class="dd-row" data-goto="6" role="menuitem" tabindex="-1">Transmission<span class="sc">E</span></div>
         </div>
       </div>
 
     </nav>
+
     <div class="b-right">
-      <span id="bTool">Select</span>
-      <div class="b-sep"></div>
-      <span id="bClock">00:00:00</span>
-      <div class="batt">
-        <div class="batt-icon"><div id="battFill"></div></div>
-        <span id="battPct">—</span>
+      <span id="bTool" class="b-tool-label">Select</span>
+      <div class="b-sep" aria-hidden="true"></div>
+      <time id="bClock" aria-live="off" aria-label="Current time">00:00:00</time>
+      <div class="batt" aria-label="Battery">
+        <div class="batt-icon" aria-hidden="true">
+          <div id="battFill"></div>
+        </div>
+        <span id="battPct" aria-live="polite">—</span>
       </div>
     </div>
+
   </header>
 
-  <!-- LEFT TOOLBAR -->
-  <aside id="tb">
-    <button class="t on" data-tool="0" data-tip="Hero  [V]" onclick="go(0)">
-      <svg viewBox="0 0 24 24"><path d="M4 2l13 11-6 1 3 6-2 1-3-6-5 5V2z"/></svg>
-      <span class="hk">V</span>
+  <!-- ───────────────────────────────────────────
+       LEFT TOOLBAR
+  ─────────────────────────────────────────────── -->
+  <aside id="tb" aria-label="Tools">
+
+    <!-- V — Hero (Select cursor) -->
+    <button class="t on" data-tool="0" data-tip="Hero [V]" aria-label="Hero" aria-pressed="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 2l13 11-6 1 3 6-2 1-3-6-5 5V2z"/>
+      </svg>
+      <span class="hk" aria-hidden="true">V</span>
     </button>
-    <button class="t" data-tool="1" data-tip="Manifesto  [P]" onclick="go(1)">
-      <svg viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-      <span class="hk">P</span>
+
+    <!-- P — Manifesto (Pen) -->
+    <button class="t" data-tool="1" data-tip="Manifesto [P]" aria-label="Manifesto" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M17 3a2.83 2.83 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      <span class="hk" aria-hidden="true">P</span>
     </button>
-    <button class="t" data-tool="2" data-tip="Work  [F]" onclick="go(2)">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      <span class="hk">F</span>
+
+    <!-- F — Work (Folder) -->
+    <button class="t" data-tool="2" data-tip="Work [F]" aria-label="Work" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+      </svg>
+      <span class="hk" aria-hidden="true">F</span>
     </button>
-    <div class="tb-sep"></div>
-    <button class="t" data-tool="3" data-tip="Arsenal  [L]" onclick="go(3)">
-      <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-      <span class="hk">L</span>
+
+    <div class="tb-sep" aria-hidden="true"></div>
+
+    <!-- L — Arsenal (Layers) -->
+    <button class="t" data-tool="3" data-tip="Arsenal [L]" aria-label="Arsenal" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+        <polyline points="2 17 12 22 22 17"/>
+        <polyline points="2 12 12 17 22 12"/>
+      </svg>
+      <span class="hk" aria-hidden="true">L</span>
     </button>
-    <button class="t" data-tool="4" data-tip="Metrics  [G]" onclick="go(4)">
-      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      <span class="hk">G</span>
+
+    <!-- G — Metrics (Activity graph) -->
+    <button class="t" data-tool="4" data-tip="Metrics [G]" aria-label="Metrics" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      <span class="hk" aria-hidden="true">G</span>
     </button>
-    <button class="t" data-tool="5" data-tip="Contact  [E]" onclick="go(5)">
-      <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-      <span class="hk">E</span>
+
+    <!-- T — The Lab (Terminal) -->
+    <button class="t" data-tool="5" data-tip="The Lab [T]" aria-label="The Lab" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="4 17 10 11 4 5"/>
+        <line x1="12" y1="19" x2="20" y2="19"/>
+      </svg>
+      <span class="hk" aria-hidden="true">T</span>
     </button>
+
+    <!-- E — Transmission (Export/Upload) -->
+    <button class="t" data-tool="6" data-tip="Transmission [E]" aria-label="Transmission" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      <span class="hk" aria-hidden="true">E</span>
+    </button>
+
   </aside>
 
-  <!-- CENTER CANVAS -->
+  <!-- ───────────────────────────────────────────
+       CENTER CANVAS
+  ─────────────────────────────────────────────── -->
   <main id="cv">
+
+    <!-- Context / breadcrumb bar -->
     <div class="cv-top">
       <div class="cv-crumb">
-        <span>NM OS</span>
-        <span style="color:var(--b2)">/</span>
+        <span class="cv-crumb-root">NM OS</span>
+        <span class="cv-crumb-sep" aria-hidden="true">/</span>
         <b id="cvCrumb">Hero</b>
       </div>
+      <div id="cvActions" class="cv-actions"></div>
     </div>
 
-    <div class="cv-body" id="cvBody">
+    <!-- Scrollable viewport -->
+    <div id="cvBody" class="cv-body">
 
-      <!-- VIEW 0: HERO -->
-      <div class="view on" id="v0">
+      <!-- ══════════════════════════════════════
+           VIEW 0 — HERO
+      ══════════════════════════════════════ -->
+      <section id="v0" class="view on" aria-label="Hero">
         <div class="artboard">
           <span class="ab-label">ARTBOARD — IDENTITY</span>
-          <span class="ch ch-tl"></span><span class="ch ch-tr"></span>
-          <span class="ch ch-bl"></span><span class="ch ch-br"></span>
-          <div class="h-name">NOUR<br>MOHAMED</div>
+          <span class="ch ch-tl" aria-hidden="true"></span>
+          <span class="ch ch-tr" aria-hidden="true"></span>
+          <span class="ch ch-bl" aria-hidden="true"></span>
+          <span class="ch ch-br" aria-hidden="true"></span>
+
+          <h1 class="h-name">NOUR<br>MOHAMED</h1>
+
           <div class="h-role-row">
-            <div class="h-dot"></div>
-            <div class="h-role" id="hRole">AI Director</div>
+            <span class="h-dot" aria-hidden="true"></span>
+            <span class="h-role" id="hRole" aria-live="polite">AI Director</span>
           </div>
+
           <div class="h-meta">
-            <div class="hm"><span class="hm-k">Location</span><span class="hm-v">New Cairo, EG</span></div>
-            <div class="hm"><span class="hm-k">Status</span><span class="hm-v" style="color:var(--fire)">● Available</span></div>
-            <div class="hm"><span class="hm-k">Since</span><span class="hm-v">2019</span></div>
-            <div class="hm"><span class="hm-k">Disciplines</span><span class="hm-v">8+</span></div>
+            <div class="hm">
+              <span class="hm-k">Location</span>
+              <span class="hm-v">New Cairo, EG</span>
+            </div>
+            <div class="hm">
+              <span class="hm-k">Status</span>
+              <span class="hm-v hm-available">● Available</span>
+            </div>
+            <div class="hm">
+              <span class="hm-k">Since</span>
+              <span class="hm-v">2019</span>
+            </div>
+            <div class="hm">
+              <span class="hm-k">Disciplines</span>
+              <span class="hm-v">8+</span>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- VIEW 1: MANIFESTO -->
-      <div class="view" id="v1">
-        <div class="m-wrap">
-          <div class="eyebrow">02 — Manifesto</div>
-          <blockquote class="m-q">"I don't just design visuals —<br>I build worlds."</blockquote>
-          <p class="m-usp">Bridging Hyperluxury with Street Culture without losing the authenticity of either.</p>
-          <div class="p-grid">
-            <div class="pc"><div class="pc-n">01</div><div class="pc-t">CRAFT</div><div class="pc-b">Graphic Design · Brand Identity · Arabic Typography · Packaging &amp; Print</div></div>
-            <div class="pc"><div class="pc-n">02</div><div class="pc-t">INTELLIGENCE</div><div class="pc-b">AI Direction · Prompt Engineering · Cinematic AI Video · 3D Arch Viz</div></div>
-            <div class="pc"><div class="pc-n">03</div><div class="pc-t">STRATEGY</div><div class="pc-b">Social Media · Experiential Marketing · Operations · Content Direction</div></div>
+      <!-- ══════════════════════════════════════
+           VIEW 1 — MANIFESTO / NODE DIAGRAM
+      ══════════════════════════════════════ -->
+      <section id="v1" class="view" aria-label="Manifesto">
+        <div class="eyebrow">02 — CREATIVE DNA · PROCESS ARCHITECTURE</div>
+
+        <blockquote class="m-q">"I don't just design visuals —<br>I build worlds."</blockquote>
+        <p class="m-usp">Bridging Hyperluxury with Street Culture without losing the authenticity of either.</p>
+
+        <!-- Node Diagram -->
+        <div class="node-diagram" id="nodeDiagram" role="img" aria-label="4-step creative process flow">
+
+          <div class="node" data-n="0">
+            <div class="node-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                <line x1="12" y1="22.08" x2="12" y2="12"/>
+              </svg>
+            </div>
+            <span class="node-num">01</span>
+            <h3 class="node-title">DNA Extraction</h3>
+            <p class="node-body">Reverse Engineering brand essence, cultural tension &amp; market white space</p>
+          </div>
+
+          <div class="node-connector" aria-hidden="true"></div>
+
+          <div class="node" data-n="1">
+            <div class="node-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <line x1="3" y1="9" x2="21" y2="9"/>
+                <line x1="9" y1="21" x2="9" y2="9"/>
+              </svg>
+            </div>
+            <span class="node-num">02</span>
+            <h3 class="node-title">Spatial Architecture</h3>
+            <p class="node-body">Dark Luxury materiality &amp; ultra-refined visual language construction</p>
+          </div>
+
+          <div class="node-connector" aria-hidden="true"></div>
+
+          <div class="node node-active" data-n="2">
+            <div class="node-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </div>
+            <span class="node-num">03</span>
+            <h3 class="node-title">Flashcore Protocol</h3>
+            <p class="node-body">Precision Prompt Engineering fused with tactical surrealism &amp; absurdist luxury</p>
+          </div>
+
+          <div class="node-connector" aria-hidden="true"></div>
+
+          <div class="node" data-n="3">
+            <div class="node-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="23 7 16 12 23 17 23 7"/>
+                <rect x="1" y="5" width="15" height="14" rx="2"/>
+              </svg>
+            </div>
+            <span class="node-num">04</span>
+            <h3 class="node-title">Cinematic Deployment</h3>
+            <p class="node-body">Motion, narrative &amp; omni-channel operational execution at studio quality</p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════
+           VIEW 2 — WORK / PROJECTS CANVAS
+      ══════════════════════════════════════ -->
+      <section id="v2" class="view view-work" aria-label="Work">
+
+        <div id="wkCanvas" class="wk-canvas">
+
+          <!-- pw0: Gray Museum -->
+          <div class="pw" id="pw0" data-proj="0" style="left:40px;top:40px">
+            <div class="pw-bar">
+              <button class="pw-d pw-close" aria-label="Minimize to bin" title="Minimize to Bin">×</button>
+              <span class="pw-d pw-dot-min" aria-hidden="true"></span>
+              <span class="pw-d pw-dot-max" aria-hidden="true"></span>
+              <span class="pw-n">GRAY MUSEUM</span>
+            </div>
+            <div class="pw-body">
+              <div class="pw-cat">AI Art · Macabre Surrealism</div>
+              <h3 class="pw-ttl">Gray Museum</h3>
+              <div class="pw-mets">
+                <div class="pw-met"><strong>337.5K</strong> Pinterest Impressions</div>
+                <div class="pw-met"><strong>+5,715%</strong> IG Reach Increase</div>
+                <div class="pw-met"><strong>2024</strong></div>
+              </div>
+              <div class="pw-tags">
+                <span class="pw-tag">AI Direction</span>
+                <span class="pw-tag fire">Flashcore Protocol</span>
+                <span class="pw-tag">Dark Aesthetics</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- pw1: M3anyi -->
+          <div class="pw" id="pw1" data-proj="1" style="left:350px;top:30px">
+            <div class="pw-bar">
+              <button class="pw-d pw-close" aria-label="Minimize to bin">×</button>
+              <span class="pw-d pw-dot-min" aria-hidden="true"></span>
+              <span class="pw-d pw-dot-max" aria-hidden="true"></span>
+              <span class="pw-n">M3ANYI</span>
+            </div>
+            <div class="pw-body">
+              <div class="pw-cat">Digital Community · Street Philosophy</div>
+              <h3 class="pw-ttl">M3anyi</h3>
+              <div class="pw-mets">
+                <div class="pw-met"><strong>484.2K</strong> Total Impressions</div>
+                <div class="pw-met"><strong>88.8K</strong> Single Post Reach</div>
+                <div class="pw-met"><strong>2024</strong></div>
+              </div>
+              <div class="pw-tags">
+                <span class="pw-tag">Arabic Typography</span>
+                <span class="pw-tag fire">Magic Realism</span>
+                <span class="pw-tag">Street Culture</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- pw2: Chiky Pop -->
+          <div class="pw" id="pw2" data-proj="2" style="left:660px;top:50px">
+            <div class="pw-bar">
+              <button class="pw-d pw-close" aria-label="Minimize to bin">×</button>
+              <span class="pw-d pw-dot-min" aria-hidden="true"></span>
+              <span class="pw-d pw-dot-max" aria-hidden="true"></span>
+              <span class="pw-n">CHIKY POP</span>
+            </div>
+            <div class="pw-body">
+              <div class="pw-cat">F&amp;B Brand · Full Launch</div>
+              <h3 class="pw-ttl">Chiky Pop</h3>
+              <div class="pw-mets">
+                <div class="pw-met"><strong>7 Days</strong> Zero-to-Launch</div>
+                <div class="pw-met"><strong>100+</strong> Daily Orders</div>
+                <div class="pw-met"><strong>2023</strong></div>
+              </div>
+              <div class="pw-tags">
+                <span class="pw-tag">Brand Identity</span>
+                <span class="pw-tag fire">Operations Lead</span>
+                <span class="pw-tag">F&amp;B</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- pw3: Shero Handmade -->
+          <div class="pw" id="pw3" data-proj="3" style="left:40px;top:320px">
+            <div class="pw-bar">
+              <button class="pw-d pw-close" aria-label="Minimize to bin">×</button>
+              <span class="pw-d pw-dot-min" aria-hidden="true"></span>
+              <span class="pw-d pw-dot-max" aria-hidden="true"></span>
+              <span class="pw-n">SHERO HANDMADE</span>
+            </div>
+            <div class="pw-body">
+              <div class="pw-cat">Luxury Jewelry · Global Positioning</div>
+              <h3 class="pw-ttl">Shero Handmade</h3>
+              <div class="pw-mets">
+                <div class="pw-met"><strong>Global</strong> Luxury Territory</div>
+                <div class="pw-met"><strong>100%</strong> Creative Ownership</div>
+                <div class="pw-met"><strong>2023</strong></div>
+              </div>
+              <div class="pw-tags">
+                <span class="pw-tag">Dark Luxury</span>
+                <span class="pw-tag fire">Logo Architecture</span>
+                <span class="pw-tag">Jewelry</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- pw4: Golden Home -->
+          <div class="pw" id="pw4" data-proj="4" style="left:350px;top:310px">
+            <div class="pw-bar">
+              <button class="pw-d pw-close" aria-label="Minimize to bin">×</button>
+              <span class="pw-d pw-dot-min" aria-hidden="true"></span>
+              <span class="pw-d pw-dot-max" aria-hidden="true"></span>
+              <span class="pw-n">GOLDEN HOME</span>
+            </div>
+            <div class="pw-body">
+              <div class="pw-cat">Real Estate · Brand + Digital</div>
+              <h3 class="pw-ttl">Golden Home</h3>
+              <div class="pw-mets">
+                <div class="pw-met"><strong>100%</strong> Creative Ownership</div>
+                <div class="pw-met"><strong>Full Stack</strong> Brand + Web</div>
+                <div class="pw-met"><strong>2023</strong></div>
+              </div>
+              <div class="pw-tags">
+                <span class="pw-tag">Creative Direction</span>
+                <span class="pw-tag fire">Web Design</span>
+                <span class="pw-tag">Real Estate</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- pw5: Design-itude -->
+          <div class="pw" id="pw5" data-proj="5" style="left:660px;top:320px">
+            <div class="pw-bar">
+              <button class="pw-d pw-close" aria-label="Minimize to bin">×</button>
+              <span class="pw-d pw-dot-min" aria-hidden="true"></span>
+              <span class="pw-d pw-dot-max" aria-hidden="true"></span>
+              <span class="pw-n">DESIGN-ITUDE</span>
+            </div>
+            <div class="pw-body">
+              <div class="pw-cat">Architecture &amp; Interior · AI Integration</div>
+              <h3 class="pw-ttl">Design-itude</h3>
+              <div class="pw-mets">
+                <div class="pw-met"><strong>125+</strong> Projects Delivered</div>
+                <div class="pw-met"><strong>−60%</strong> Concept Time Saved</div>
+                <div class="pw-met"><strong>2022–24</strong></div>
+              </div>
+              <div class="pw-tags">
+                <span class="pw-tag">3D Visualization</span>
+                <span class="pw-tag fire">AI Integration</span>
+                <span class="pw-tag">Architecture</span>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /wk-canvas -->
+
+        <!-- Project Bin -->
+        <div id="projBin" class="proj-bin" role="region" aria-label="Project Bin">
+          <div class="bin-label" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="11" height="11">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6l-1 14H6L5 6"/>
+              <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
+            </svg>
+            Bin
+          </div>
+          <div id="binItems" class="bin-items" role="list" aria-label="Minimized projects"></div>
+        </div>
+
+      </section>
+
+      <!-- ══════════════════════════════════════
+           VIEW 3 — ARSENAL / LAYERS (Photoshop-style)
+      ══════════════════════════════════════ -->
+      <section id="v3" class="view view-layers" aria-label="Arsenal Layers">
+
+        <!-- Abstract shapes preview canvas (left) -->
+        <div class="layer-canvas" id="layerCanvas" aria-hidden="true">
+
+          <!-- Group 0 — Visuals -->
+          <div class="lc-group" id="lcg0">
+            <div class="lc-shape lcs-rect-lg"  data-shape="0"></div>
+            <div class="lc-shape lcs-circle"   data-shape="1"></div>
+            <div class="lc-shape lcs-type-blk" data-shape="2">Aa</div>
+          </div>
+
+          <!-- Group 1 — AI Worlds -->
+          <div class="lc-group" id="lcg1">
+            <div class="lc-shape lcs-poly"     data-shape="3"></div>
+            <div class="lc-shape lcs-gradient" data-shape="4"></div>
+            <div class="lc-shape lcs-lineart"  data-shape="5"></div>
+          </div>
+
+          <!-- Group 2 — Film Brain -->
+          <div class="lc-group" id="lcg2">
+            <div class="lc-shape lcs-stripe-h" data-shape="6"></div>
+            <div class="lc-shape lcs-stripe-d" data-shape="7"></div>
+            <div class="lc-shape lcs-dot-grid" data-shape="8"></div>
+          </div>
+
+        </div>
+
+        <!-- PS-style Layers Panel (right) -->
+        <div class="layers-panel" id="layersPanel">
+
+          <div class="lp-top">
+            <span class="lp-title">Layers</span>
+            <button class="lp-new-btn" aria-label="New layer" title="New Layer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- ── Group: Visuals ── -->
+          <div class="lg" id="lg0">
+            <div class="lg-header" data-group="0">
+              <span class="lg-arrow expanded" aria-hidden="true">▾</span>
+              <button class="eye-btn" data-group-eye="0" aria-label="Toggle Visuals visibility" aria-pressed="true">
+                <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" class="lg-folder-icon" aria-hidden="true">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span class="lg-name">Visuals</span>
+              <span class="lg-count">3</span>
+            </div>
+            <div class="lg-children" id="lgc0">
+              <div class="layer-row" data-layer="0">
+                <button class="eye-btn" data-layer-eye="0" aria-label="Toggle Brand Geometry visibility" aria-pressed="true">
+                  <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+                <div class="layer-thumb lt-fill" aria-hidden="true"></div>
+                <span class="layer-name">Brand Geometry</span>
+                <span class="layer-mode">Normal</span>
+              </div>
+              <div class="layer-row" data-layer="1">
+                <button class="eye-btn" data-layer-eye="1" aria-label="Toggle Identity Circle visibility" aria-pressed="true">
+                  <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+                <div class="layer-thumb lt-circle" aria-hidden="true"></div>
+                <span class="layer-name">Identity Circle</span>
+                <span class="layer-mode">Screen</span>
+              </div>
+              <div class="layer-row" data-layer="2">
+                <button class="eye-btn" data-layer-eye="2" aria-label="Toggle Typography System visibility" aria-pressed="true">
+                  <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+                <div class="layer-thumb lt-type" aria-hidden="true">Aa</div>
+                <span class="layer-name">Typography System</span>
+                <span class="layer-mode">Multiply</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Group: AI Worlds ── -->
+          <div class="lg" id="lg1">
+            <div class="lg-header" data-group="1">
+              <span class="lg-arrow expanded" aria-hidden="true">▾</span>
+              <button class="eye-btn" data-group-eye="1" aria-label="Toggle AI Worlds visibility" aria-pressed="true">
+                <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" class="lg-folder-icon" aria-hidden="true">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span class="lg-name">AI Worlds</span>
+              <span class="lg-count">3</span>
+            </div>
+            <div class="lg-children" id="lgc1">
+              <div class="layer-row" data-layer="3">
+                <button class="eye-btn" data-layer-eye="3" aria-label="Toggle Midjourney Scenes visibility" aria-pressed="true">
+                  <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+                <div class="layer-thumb lt-poly" aria-hidden="true"></div>
+                <span class="layer-name">Midjourney Scenes</span>
+                <span class="layer-mode">Normal</span>
+              </div>
+              <div class="layer-row" data-layer="4">
+                <button class="eye-btn" data-layer-eye="4" aria-label="Toggle Prompt Architecture visibility" aria-pressed="true">
+                  <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+                <div class="layer-thumb lt-grad" aria-hidden="true"></div>
+                <span class="layer-name">Prompt Architecture</span>
+                <span class="layer-mode">Overlay</span>
+              </div>
+              <div class="layer-row" data-layer="5">
+                <button class="eye-btn" data-layer-eye="5" aria-label="Toggle Flashcore Renders visibility" aria-pressed="true">
+                  <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+                <div class="layer-thumb lt-line" aria-hidden="true"></div>
+                <span class="layer-name">Flashcore Renders</span>
+                <span class="layer-mode">Add</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Group: Film Brain ── -->
+          <div class="lg" id="lg2">
+            <div class="lg-header" data-group="2">
+              <span class="lg-arrow expanded" aria-hidden="true">▾</span>
+              <button class="eye-btn" data-group-eye="2" aria-label="Toggle Film Brain visibility" aria-pressed="true">
+                <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" class="lg-folder-icon" aria-hidden="true">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span class="lg-name">Film Brain</span>
+              <span class="lg-count">3</span>
+            </div>
+            <div class="lg-children" id="lgc2">
+              <div class="layer-row" data-layer="6">
+                <button class="eye-btn" data-layer-eye="6" aria-label="Toggle Cinematic Cuts visibility" aria-pressed="true">
+                  <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+                <div class="layer-thumb lt-stripe" aria-hidden="true"></div>
+                <span class="layer-name">Cinematic Cuts</span>
+                <span class="layer-mode">Hard Light</span>
+              </div>
+              <div class="layer-row" data-layer="7">
+                <button class="eye-btn" data-layer-eye="7" aria-label="Toggle Motion Graphics visibility" aria-pressed="true">
+                  <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+                <div class="layer-thumb lt-stripe lt-stripe-alt" aria-hidden="true"></div>
+                <span class="layer-name">Motion Graphics</span>
+                <span class="layer-mode">Screen</span>
+              </div>
+              <div class="layer-row" data-layer="8">
+                <button class="eye-btn" data-layer-eye="8" aria-label="Toggle Sound Design visibility" aria-pressed="true">
+                  <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" aria-hidden="true">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                </button>
+                <div class="layer-thumb lt-dot" aria-hidden="true"></div>
+                <span class="layer-name">Sound Design</span>
+                <span class="layer-mode">Dissolve</span>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /layers-panel -->
+      </section>
+
+      <!-- ══════════════════════════════════════
+           VIEW 4 — LIVE METRICS
+      ══════════════════════════════════════ -->
+      <section id="v4" class="view" aria-label="Live Metrics">
+        <div class="eyebrow">05 — RESULTS · NUMBERS DON'T LIE</div>
+        <div class="mt-grid" id="mtGrid" role="list"></div>
+        <p class="mt-footnote">Live campaign data. Last updated 2024.</p>
+      </section>
+
+      <!-- ══════════════════════════════════════
+           VIEW 5 — THE LAB / TERMINAL
+      ══════════════════════════════════════ -->
+      <section id="v5" class="view view-lab" aria-label="The Lab">
+        <div class="terminal-wrap">
+          <div class="term-header" aria-hidden="true">
+            <div class="term-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="term-title">flashcore_engine.sh — bash — 80×24</span>
+          </div>
+          <div class="term-body" id="termBody" aria-live="polite" aria-label="Terminal output">
+            <div id="termOut"></div>
+            <span class="term-cursor" id="termCursor" aria-hidden="true">█</span>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- VIEW 2: WORK -->
-      <div class="view" id="v2" style="padding:0;height:100%">
-        <div id="wk-canvas"></div>
-      </div>
-
-      <!-- VIEW 3: ARSENAL -->
-      <div class="view" id="v3">
-        <div class="sk-wrap">
-          <div class="eyebrow">04 — Arsenal · Weapons of Choice</div>
-          <div id="skList"></div>
-        </div>
-      </div>
-
-      <!-- VIEW 4: METRICS -->
-      <div class="view" id="v4">
-        <div class="eyebrow" style="margin-bottom:20px">05 — Results · Numbers Don't Lie</div>
-        <div class="mt-grid" id="mtGrid"></div>
-      </div>
-
-      <!-- VIEW 5: CONTACT -->
-      <div class="view" id="v5">
+      <!-- ══════════════════════════════════════
+           VIEW 6 — TRANSMISSION / CONTACT
+      ══════════════════════════════════════ -->
+      <section id="v6" class="view" aria-label="Transmission">
         <div class="ct-wrap">
-          <div class="eyebrow">06 — Transmission</div>
+          <div class="eyebrow">07 — TRANSMISSION</div>
           <h2 class="ct-cta">Let's build<br><em>something</em><br>impossible.</h2>
-          <div>
-            <a href="mailto:2mrikydesign@gmail.com" class="ct-link"><span class="ct-lbl">Email</span><span class="ct-v">2mrikydesign@gmail.com</span></a>
-            <a href="tel:+201555846969"              class="ct-link"><span class="ct-lbl">Phone</span><span class="ct-v">0155 584 6969</span></a>
-            <a href="tel:+201143650240"              class="ct-link"><span class="ct-lbl">Alt</span><span class="ct-v">0114 365 0240</span></a>
+
+          <div class="ct-links">
+            <a href="mailto:2mrikydesign@gmail.com" class="ct-link">
+              <span class="ct-lbl">Email</span>
+              <span class="ct-v">2mrikydesign@gmail.com</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+            <a href="tel:+201555846969" class="ct-link">
+              <span class="ct-lbl">Phone</span>
+              <span class="ct-v">0155 584 6969</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+            <a href="tel:+201143650240" class="ct-link">
+              <span class="ct-lbl">Alt</span>
+              <span class="ct-v">0114 365 0240</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
           </div>
-          <div class="soc-row">
-            <a href="https://www.instagram.com/i2mriky" target="_blank" rel="noopener" class="soc" aria-label="Instagram">
-              <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor" stroke="none"/></svg>
+
+          <div class="soc-row" role="list" aria-label="Social links">
+            <a href="https://www.instagram.com/i2mriky" target="_blank" rel="noopener noreferrer" class="soc" role="listitem" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor" stroke="none"/></svg>
             </a>
-            <a href="https://www.threads.com/@i2mriky" target="_blank" rel="noopener" class="soc" aria-label="Threads">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-dasharray="3 2"/><path d="M9 12a3 3 0 1 0 6 0 3 3 0 0 0-6 0"/></svg>
+            <a href="https://www.threads.com/@i2mriky" target="_blank" rel="noopener noreferrer" class="soc" role="listitem" aria-label="Threads">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke-dasharray="3 2"/><path d="M9 12a3 3 0 1 0 6 0 3 3 0 0 0-6 0"/></svg>
             </a>
-            <a href="https://pin.it/2CN4waZRs" target="_blank" rel="noopener" class="soc" aria-label="Pinterest">
-              <svg viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12c0 4.2 2.6 7.9 6.4 9.3 0-.8-.2-2 0-2.8l1.2-5.1s-.3-.6-.3-1.5c0-1.4.8-2.5 1.9-2.5.9 0 1.3.7 1.3 1.5 0 .9-.6 2.2-.9 3.5-.2 1 .5 1.9 1.5 1.9 1.8 0 3.2-1.9 3.2-4.7 0-2.5-1.8-4.2-4.3-4.2-3 0-4.7 2.2-4.7 4.5 0 .9.3 1.8.8 2.4.1.1.1.2.1.3l-.3 1.2c-.1.2-.2.2-.4.1-1.4-.7-2.3-2.7-2.3-4.3 0-3.5 2.6-6.8 7.4-6.8 3.9 0 6.9 2.8 6.9 6.4 0 3.8-2.4 6.9-5.8 6.9-1.1 0-2.2-.6-2.6-1.3L9.8 19c-.2 1-.9 2.2-1.4 2.9C10 22 11 22 12 22c5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg>
+            <a href="https://pin.it/2CN4waZRs" target="_blank" rel="noopener noreferrer" class="soc" role="listitem" aria-label="Pinterest">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.24 2.65 7.86 6.39 9.29-.09-.78-.17-1.98.03-2.82l1.22-5.16s-.31-.62-.31-1.55c0-1.45.84-2.54 1.89-2.54.89 0 1.32.67 1.32 1.48 0 .9-.58 2.25-.87 3.5-.25 1.05.52 1.9 1.53 1.9 1.84 0 3.26-1.94 3.26-4.75 0-2.48-1.79-4.22-4.34-4.22-2.95 0-4.69 2.21-4.69 4.5 0 .89.34 1.84.77 2.36.08.1.09.19.07.3l-.29 1.16c-.05.18-.16.22-.37.13-1.39-.65-2.26-2.69-2.26-4.33 0-3.51 2.55-6.74 7.36-6.74 3.86 0 6.86 2.75 6.86 6.42 0 3.83-2.41 6.9-5.76 6.9-1.13 0-2.19-.59-2.55-1.28l-.69 2.58c-.25.97-.93 2.18-1.39 2.91.98.3 2.01.46 3.07.46 5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg>
             </a>
-            <a href="https://www.facebook.com/share/1CdGE1wiuy/" target="_blank" rel="noopener" class="soc" aria-label="Facebook">
-              <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            <a href="https://www.facebook.com/share/1CdGE1wiuy/" target="_blank" rel="noopener noreferrer" class="soc" role="listitem" aria-label="Facebook">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
             </a>
           </div>
         </div>
-      </div>
+      </section>
 
     </div><!-- /cv-body -->
 
-    <!-- Status bar -->
-    <div class="cv-bot">
+    <!-- Status Bar -->
+    <div class="cv-bot" aria-hidden="true">
       <div class="sb">Tool: <span id="sbTool">Select</span></div>
       <div class="sb">X: <span id="sbX">0</span> &nbsp;Y: <span id="sbY">0</span></div>
       <div class="sb sb-r">Zoom: <span>100%</span></div>
     </div>
+
   </main>
 
-  <!-- RIGHT INSPECTOR -->
-  <aside id="ip">
+  <!-- ───────────────────────────────────────────
+       RIGHT INSPECTOR PANEL
+  ─────────────────────────────────────────────── -->
+  <aside id="ip" aria-label="Inspector">
     <div class="ip-top">
       <span class="ip-title">Inspector</span>
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--b3)" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="11" height="11" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
     </div>
-    <div class="ip-body" id="ipBody"></div>
+    <div class="ip-body" id="ipBody">
+      <!-- Populated dynamically by os.js -->
+    </div>
   </aside>
 
 </div><!-- /app -->
 
-<!-- Mobile Bottom Sheet -->
-<div id="bsheet">
-  <div class="bs-handle"></div>
-  <span class="bs-x" onclick="closeSheet()">×</span>
-  <div id="bsContent" style="padding:8px 14px 20px"></div>
+<!-- ═══════════════════════════════════════════════
+     MOBILE BOTTOM SHEET
+═══════════════════════════════════════════════ -->
+<div id="bsheet" role="dialog" aria-modal="true" aria-label="Project details" aria-hidden="true">
+  <div class="bs-drag" id="bsDrag" aria-hidden="true">
+    <span class="bs-handle"></span>
+  </div>
+  <div class="bs-header">
+    <span class="bs-title" id="bsTitle">Project</span>
+    <button class="bs-close" id="bsClose" aria-label="Close project details">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+  <div id="bsContent" class="bs-content"></div>
 </div>
 
-<!-- ══════════════════════════ SCRIPT ══════════════════════════ -->
-<script>
-'use strict';
-
-/* ════════════════════════════════════════════════
-   DATA
-════════════════════════════════════════════════ */
-const PROJECTS = [
-  { id:0, title:'GRAY MUSEUM',     cat:'AI Art · Macabre Surrealism',        year:'2024',
-    metrics:[['Impressions','337.5K'],[' Reach Increase','+5,715%'],['Platform','Pinterest/IG']],
-    tags:['AI Direction','Flashcore Protocol','Dark Aesthetics'],
-    desc:'A hauntingly curated AI art series exploring macabre surrealism through deliberate prompt architecture and directorial vision.',
-    x:38, y:44 },
-  { id:1, title:'M3ANYI',          cat:'Digital Community · Street Philosophy',year:'2024',
-    metrics:[['Total Impressions','484.2K'],['Single Post Reach','88.8K'],['Growth','Organic']],
-    tags:['Arabic Typography','Magic Realism','Street Culture'],
-    desc:'A community built on raw Arabic street philosophy — bridging the underground with the digital generation.',
-    x:350, y:28 },
-  { id:2, title:'CHIKY POP',       cat:'F&B · Brand Launch',                  year:'2023',
-    metrics:[['Launch Time','7 Days'],['Daily Orders','100+'],['Scope','Full Brand']],
-    tags:['Brand Identity','Operations Lead','F&B'],
-    desc:'Zero-to-launch in 7 days. Full identity, operational setup, and content direction for a fast-growing food concept.',
-    x:650, y:55 },
-  { id:3, title:'SHERO HANDMADE',  cat:'Luxury Jewelry',                      year:'2023',
-    metrics:[['Positioning','Global Luxury'],['Direction','100% Owned'],['Style','Dark Luxury']],
-    tags:['Dark Luxury','Logo Architecture','Jewelry'],
-    desc:'Positioned a handmade jewelry brand in global luxury territory through refined visual identity and editorial art direction.',
-    x:38, y:305 },
-  { id:4, title:'GOLDEN HOME',     cat:'Real Estate',                         year:'2023',
-    metrics:[['Creative Ownership','100%'],['Deliverables','Brand + Web'],['Sector','Real Estate']],
-    tags:['Creative Direction','Web Design','Property'],
-    desc:'End-to-end creative direction — identity, digital presence, and marketing collateral for a property brand.',
-    x:350, y:290 },
-  { id:5, title:'DESIGN-ITUDE',    cat:'Architecture & Interior',             year:'2022–24',
-    metrics:[['Projects','125+'],['Concept Time Saved','−60%'],['AI Depth','Deep Integration']],
-    tags:['3D Visualization','AI Integration','Architecture'],
-    desc:'Creative lead for 125+ architectural projects. Reduced concept-to-approval time by 60% through AI-augmented workflows.',
-    x:650, y:310 },
-  { id:6, title:'UNNAMED',         cat:'Classified Project',                  year:'2024',
-    metrics:[['Status','Confidential'],['Category','Undisclosed'],['Impact','TBD']],
-    tags:['Classified','In Progress'],
-    desc:'[REDACTED] — Sensitive creative direction project currently under NDA.',
-    x:200, y:170 },
-];
-
-const SKILLS = [
-  { name:'DESIGN CORE',    pct:98, chips:['Photoshop','Illustrator','Figma','After Effects'] },
-  { name:'AI WORLDS',      pct:97, chips:['Midjourney','Runway','ComfyUI','Prompt Architecture'] },
-  { name:'FILM BRAIN',     pct:94, chips:['Premiere Pro','Cinematic Direction','AI Video'] },
-  { name:'REAL WORLD',     pct:92, chips:['Experiential Marketing','Operations','Events'] },
-  { name:'THE PEN',        pct:90, chips:['Arabic Typography','Brand Narrative','Conceptual'] },
-  { name:'SPATIAL VISION', pct:88, chips:['3ds Max','Lumion','V-Ray','SketchUp'] },
-];
-
-const METRICS = [
-  { pre:'',  num:'337',  unit:'K', lbl:'Pinterest Impressions', src:'Gray Museum' },
-  { pre:'+', num:'5715', unit:'%', lbl:'IG Reach Increase',      src:'Gray Museum' },
-  { pre:'',  num:'484',  unit:'K', lbl:'Total Impressions',       src:'M3anyi' },
-  { pre:'',  num:'88.8', unit:'K', lbl:'Single Post Reach',       src:'M3anyi' },
-  { pre:'+', num:'100',  unit:'+', lbl:'Daily Orders at Launch',  src:'Chiky Pop' },
-  { pre:'',  num:'125',  unit:'+', lbl:'Projects Delivered',      src:'Design-itude' },
-];
-
-const TNAMES = ['Select','Pen','Grid','Layers','Chart','Export'];
-const VNAMES = ['Hero','Manifesto','Work','Arsenal','Metrics','Contact'];
-const KEY_MAP = { v:0, p:1, f:2, l:3, g:4, e:5 };
-
-/* ════════════════════════════════════════════════
-   STATE
-════════════════════════════════════════════════ */
-let activeTool = 0;
-let selProj    = null;
-let skillsDone = false;
-let metsDone   = false;
-let workDone   = false;
-let zC         = 10;
-
-/* ════════════════════════════════════════════════
-   INTRO
-════════════════════════════════════════════════ */
-function bootIntro() {
-  const intro = document.getElementById('intro');
-  const flash = document.getElementById('iFlash');
-  const app   = document.getElementById('app');
-
-  // SVG draw finishes ~2.15s (1.9s anim + 0.25s delay)
-  setTimeout(() => {
-    // White flash
-    flash.style.transition = 'none';
-    flash.style.opacity = '1';
-    setTimeout(() => {
-      flash.style.transition = 'opacity 140ms ease-out';
-      flash.style.opacity = '0';
-      // Scale-out SVG
-      const txt = document.getElementById('iText');
-      txt.style.transition = 'transform .5s ease, opacity .5s ease';
-      txt.style.transform  = 'scale(1.14)';
-      txt.style.opacity    = '0';
-      // Reveal UI panels
-      setTimeout(() => {
-        intro.classList.add('out');
-        app.classList.add('on');
-        setTimeout(() => { intro.style.display = 'none'; }, 450);
-      }, 160);
-    }, 50);
-  }, 2250);
-}
-
-/* ════════════════════════════════════════════════
-   CLOCK & BATTERY
-════════════════════════════════════════════════ */
-function initClock() {
-  const el = document.getElementById('bClock');
-  function tick() {
-    const d = new Date();
-    el.textContent = [d.getHours(),d.getMinutes(),d.getSeconds()]
-      .map(n => String(n).padStart(2,'0')).join(':');
-  }
-  tick(); setInterval(tick, 1000);
-}
-
-function initBattery() {
-  const fill = document.getElementById('battFill');
-  const pct  = document.getElementById('battPct');
-  if (!('getBattery' in navigator)) return;
-  navigator.getBattery().then(b => {
-    function upd() {
-      const p = Math.round(b.level * 100);
-      pct.textContent = p + '%';
-      fill.style.width = p + '%';
-      fill.style.background = p < 20 ? '#c0392b' : 'var(--fire)';
-    }
-    upd();
-    b.addEventListener('levelchange', upd);
-  }).catch(() => {});
-}
-
-/* ════════════════════════════════════════════════
-   DROPDOWN MENUS
-════════════════════════════════════════════════ */
-function toggleDD(id, el) {
-  const dd = document.getElementById(id);
-  const wasOpen = dd.classList.contains('open');
-  closeAllDD();
-  if (!wasOpen) { dd.classList.add('open'); el.classList.add('open'); }
-}
-function closeAllDD() {
-  document.querySelectorAll('.dd.open').forEach(d => d.classList.remove('open'));
-  document.querySelectorAll('.b-item.open').forEach(i => i.classList.remove('open'));
-}
-document.addEventListener('click', e => {
-  if (!e.target.closest('.b-item')) closeAllDD();
-});
-function dlCV() {
-  closeAllDD();
-  alert('CV available on request.\nContact: 2mrikydesign@gmail.com');
-}
-
-/* ════════════════════════════════════════════════
-   VIEW / TOOL SWITCHING
-════════════════════════════════════════════════ */
-function go(idx) {
-  if (idx === activeTool && idx !== 2) return;
-  activeTool = idx;
-  closeAllDD();
-
-  // Toolbar buttons
-  document.querySelectorAll('.t').forEach((b,i) => b.classList.toggle('on', i===idx));
-
-  // Views
-  document.querySelectorAll('.view').forEach((v,i) => v.classList.toggle('on', i===idx));
-
-  // Labels
-  const n = VNAMES[idx];
-  document.getElementById('bTool').textContent    = TNAMES[idx];
-  document.getElementById('cvCrumb').textContent  = n;
-  document.getElementById('sbTool').textContent   = TNAMES[idx];
-
-  // Per-view init
-  if (idx === 2) buildWork();
-  if (idx === 3) buildSkills();
-  if (idx === 4) buildMetrics();
-  if (idx !== 2) { selProj = null; renderDefaultIP(); }
-}
-
-/* ════════════════════════════════════════════════
-   KEYBOARD HOTKEYS
-════════════════════════════════════════════════ */
-document.addEventListener('keydown', e => {
-  if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
-  const idx = KEY_MAP[e.key.toLowerCase()];
-  if (idx !== undefined) go(idx);
-  if (e.key === 'Escape') closeSheet();
-});
-
-/* ════════════════════════════════════════════════
-   CANVAS MOUSE COORDS
-════════════════════════════════════════════════ */
-document.getElementById('cvBody').addEventListener('mousemove', e => {
-  const r = e.currentTarget.getBoundingClientRect();
-  document.getElementById('sbX').textContent = Math.round(e.clientX - r.left);
-  document.getElementById('sbY').textContent = Math.round(e.clientY - r.top);
-});
-
-/* ════════════════════════════════════════════════
-   HERO ROLE ROTATION
-════════════════════════════════════════════════ */
-const ROLES = ['AI Director','Creative Director','World Builder'];
-let rIdx = 0;
-function rotRole() {
-  const el = document.getElementById('hRole');
-  if (!el) return;
-  el.classList.add('fade');
-  setTimeout(() => {
-    rIdx = (rIdx + 1) % ROLES.length;
-    el.textContent = ROLES[rIdx];
-    el.classList.remove('fade');
-  }, 260);
-}
-
-/* ════════════════════════════════════════════════
-   WORK CANVAS — Draggable Windows
-════════════════════════════════════════════════ */
-function buildWork() {
-  const canvas = document.getElementById('wk-canvas');
-  if (workDone) return;
-  workDone = true;
-
-  PROJECTS.forEach(p => {
-    const w = document.createElement('div');
-    w.className = 'pw';
-    w.id = 'pw' + p.id;
-    w.style.left = p.x + 'px';
-    w.style.top  = p.y + 'px';
-
-    w.innerHTML =
-      `<div class="pw-bar">
-        <div class="pw-d f"></div><div class="pw-d"></div><div class="pw-d"></div>
-        <span class="pw-n">${p.title}</span>
-        <span class="pw-x">×</span>
-       </div>
-       <div class="pw-body">
-         <div class="pw-cat">${p.cat}</div>
-         <div class="pw-ttl">${p.title}</div>
-         <div class="pw-mets">${p.metrics.map(([k,v])=>`<div class="pw-met"><strong>${v}</strong> ${k}</div>`).join('')}</div>
-         <div class="pw-tags">${p.tags.map(t=>`<span class="pw-tag">${t}</span>`).join('')}</div>
-       </div>`;
-
-    w.querySelector('.pw-x').addEventListener('click', () => { w.style.display = 'none'; });
-    w.addEventListener('mousedown', e => {
-      if (e.target.classList.contains('pw-x')) return;
-      selProj = p.id;
-      w.style.zIndex = ++zC;
-      document.querySelectorAll('.pw').forEach(pw => pw.classList.remove('sel'));
-      w.classList.add('sel');
-      renderProjIP(p);
-      if (window.innerWidth < 768) openSheet(p);
-    });
-
-    makeDrag(w);
-    canvas.appendChild(w);
-  });
-
-  renderDefaultIP();
-}
-
-function makeDrag(el) {
-  const bar = el.querySelector('.pw-bar');
-  let on = false, sx = 0, sy = 0, ox = 0, oy = 0;
-
-  bar.addEventListener('mousedown', e => {
-    if (e.target.classList.contains('pw-x')) return;
-    on = true; sx = e.clientX; sy = e.clientY;
-    ox = el.offsetLeft; oy = el.offsetTop; e.preventDefault();
-  });
-  document.addEventListener('mousemove', e => {
-    if (!on) return;
-    el.style.left = (ox + e.clientX - sx) + 'px';
-    el.style.top  = (oy + e.clientY - sy) + 'px';
-  });
-  document.addEventListener('mouseup', () => { on = false; });
-
-  // Touch
-  bar.addEventListener('touchstart', e => {
-    if (e.target.classList.contains('pw-x')) return;
-    const t = e.touches[0]; on = true;
-    sx = t.clientX; sy = t.clientY; ox = el.offsetLeft; oy = el.offsetTop;
-  }, { passive:true });
-  document.addEventListener('touchmove', e => {
-    if (!on) return;
-    const t = e.touches[0];
-    el.style.left = (ox + t.clientX - sx) + 'px';
-    el.style.top  = (oy + t.clientY - sy) + 'px';
-  }, { passive:true });
-  document.addEventListener('touchend', () => { on = false; });
-}
-
-/* ════════════════════════════════════════════════
-   ARSENAL — Skill Bars
-════════════════════════════════════════════════ */
-function buildSkills() {
-  const list = document.getElementById('skList');
-  if (!list.childElementCount) {
-    SKILLS.forEach(s => {
-      const d = document.createElement('div');
-      d.className = 'sk-row';
-      d.innerHTML =
-        `<div class="sk-head"><span class="sk-name">${s.name}</span><span class="sk-pct">${s.pct}%</span></div>
-         <div class="sk-bg"><div class="sk-fill" style="--w:${s.pct}%"></div></div>
-         <div class="sk-chips">${s.chips.map(c=>`<span class="sk-chip">${c}</span>`).join('')}</div>`;
-      list.appendChild(d);
-    });
-  }
-  if (skillsDone) return;
-  skillsDone = true;
-  requestAnimationFrame(() => {
-    list.querySelectorAll('.sk-fill').forEach(f => f.classList.add('go'));
-  });
-}
-
-/* ════════════════════════════════════════════════
-   METRICS — Counter Animation
-════════════════════════════════════════════════ */
-function buildMetrics() {
-  const grid = document.getElementById('mtGrid');
-  if (metsDone) return;
-  metsDone = true;
-
-  METRICS.forEach(m => {
-    const b = document.createElement('div');
-    b.className = 'mt-blk';
-    b.innerHTML =
-      `<div>${m.pre ? `<span class="mt-pre">${m.pre}</span>` : ''}` +
-      `<span class="mt-num" data-t="${m.num}">0</span>` +
-      `<span class="mt-unit">${m.unit}</span></div>` +
-      `<div class="mt-lbl">${m.lbl}</div>` +
-      `<div class="mt-src">${m.src}</div>`;
-    grid.appendChild(b);
-  });
-
-  setTimeout(() => {
-    grid.querySelectorAll('.mt-num').forEach(el => {
-      const target = parseFloat(el.dataset.t);
-      const dec = el.dataset.t.includes('.');
-      const dur = 1700, t0 = performance.now();
-      const ease = t => 1 - Math.pow(1 - t, 4);
-      (function tick(now) {
-        const p = Math.min((now - t0) / dur, 1);
-        const v = ease(p) * target;
-        el.textContent = dec ? v.toFixed(1) : Math.floor(v).toLocaleString();
-        if (p < 1) requestAnimationFrame(tick);
-        else el.textContent = dec ? target.toFixed(1) : target.toLocaleString();
-      })(performance.now());
-    });
-  }, 80);
-}
-
-/* ════════════════════════════════════════════════
-   INSPECTOR PANEL
-════════════════════════════════════════════════ */
-function renderDefaultIP() {
-  document.getElementById('ipBody').innerHTML = `
-    <div class="is"><div class="is-t">Identity</div>
-      <div class="ir"><span class="il">Name</span><span class="iv">Nour Mohamed</span></div>
-      <div class="ir"><span class="il">Role</span><span class="iv hi">AI Director</span></div>
-      <div class="ir"><span class="il">Location</span><span class="iv">New Cairo, EG</span></div>
-      <div class="ir"><span class="il">Email</span><span class="iv" style="font-size:8px">2mrikydesign@gmail.com</span></div>
-    </div>
-    <div class="is"><div class="is-t">Global Stats</div>
-      <div class="ir"><span class="il">Projects</span><span class="iv hi">7+</span></div>
-      <div class="ir"><span class="il">Years Active</span><span class="iv">5+</span></div>
-      <div class="ir"><span class="il">Disciplines</span><span class="iv">8</span></div>
-      <div class="ir"><span class="il">Availability</span><span class="iv" style="color:var(--fire)">Open</span></div>
-    </div>
-    <div class="is"><div class="is-t">Philosophy</div>
-      <div class="i-desc">"I don't just design visuals — I build worlds."</div>
-    </div>
-    <div class="is"><div class="is-t">Roles</div>
-      <div class="i-tags">
-        <span class="i-tag fi">AI Director</span>
-        <span class="i-tag">Creative Director</span>
-        <span class="i-tag">World Builder</span>
-      </div>
-    </div>
-    <div class="is"><div class="is-t">Hotkeys</div>
-      ${Object.entries({V:'Hero',P:'Manifesto',F:'Work',L:'Arsenal',G:'Metrics',E:'Contact'}).map(([k,v])=>
-        `<div class="ir"><span class="il" style="font-family:'Syne';color:var(--fire);font-weight:700">${k}</span><span class="iv">${v}</span></div>`
-      ).join('')}
-    </div>`;
-}
-
-function renderProjIP(p) {
-  document.getElementById('ipBody').innerHTML = `
-    <div class="is">
-      <div class="i-big">${p.title}</div>
-      <div class="i-sub">${p.year}</div>
-      <div style="margin-top:8px">
-        <div class="ir"><span class="il">Category</span><span class="iv" style="font-size:8px">${p.cat}</span></div>
-      </div>
-    </div>
-    <div class="is"><div class="is-t">Metrics</div>
-      ${p.metrics.map(([k,v])=>`<div class="ir"><span class="il">${k}</span><span class="iv hi">${v}</span></div>`).join('')}
-    </div>
-    <div class="is"><div class="is-t">Tags</div>
-      <div class="i-tags">${p.tags.map(t=>`<span class="i-tag">${t}</span>`).join('')}</div>
-    </div>
-    <div class="is"><div class="is-t">Description</div>
-      <div class="i-desc">${p.desc}</div>
-    </div>
-    <div class="is">
-      <span class="i-back" onclick="renderDefaultIP()">← Back to identity</span>
-    </div>`;
-}
-
-/* ════════════════════════════════════════════════
-   MOBILE BOTTOM SHEET
-════════════════════════════════════════════════ */
-function openSheet(p) {
-  document.getElementById('bsContent').innerHTML =
-    `<div style="font-family:'Syne';font-size:17px;font-weight:800;color:var(--white);margin-bottom:3px">${p.title}</div>
-     <div style="font-size:8px;color:var(--smoke);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px">${p.cat} · ${p.year}</div>
-     ${p.metrics.map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--b1)"><span style="font-size:9px;color:var(--smoke)">${k}</span><span style="font-size:9px;color:var(--fire);font-weight:500">${v}</span></div>`).join('')}
-     <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:8px">${p.tags.map(t=>`<span style="font-size:7px;border:1px solid var(--b1);color:var(--smoke);padding:2px 5px;text-transform:uppercase">${t}</span>`).join('')}</div>
-     <p style="font-size:9px;color:var(--smoke);line-height:1.65;margin-top:8px;font-style:italic">${p.desc}</p>`;
-  document.getElementById('bsheet').classList.add('on');
-}
-function closeSheet() {
-  document.getElementById('bsheet').classList.remove('on');
-}
-
-/* ════════════════════════════════════════════════
-   INIT
-════════════════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', () => {
-  bootIntro();
-  initClock();
-  initBattery();
-  renderDefaultIP();
-  setInterval(rotRole, 2600);
-});
-</script>
+<script src="os.js"></script>
 </body>
 </html>
